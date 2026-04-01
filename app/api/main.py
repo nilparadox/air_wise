@@ -29,7 +29,7 @@ def default_form_data() -> dict:
 
 
 def build_chart_data(result: dict | None, air_result: dict | None, form_data: dict) -> dict | None:
-    if not result:
+    if not result or "risk_score" not in result:
         return None
 
     exposure_min = float(form_data.get("exposure_min", 45))
@@ -158,6 +158,10 @@ def predict_live(
         }
 
         result = predict_risk(payload)
+
+        if air.get("weather_note"):
+            result["advice"] = f'{result["advice"]} Note: {air["weather_note"]}'
+
         profile_result = {
             "baseline_lung": baseline_lung,
             "sensitivity": sensitivity_label(baseline_lung),
@@ -170,10 +174,12 @@ def predict_live(
             profile_result=profile_result,
             form_data=form_data,
         )
-    except Exception as e:
+    except Exception:
         return render_home(
             request=request,
-            result={"advice": f"Prediction failed: {e}"},
+            result={
+                "advice": "Live data could not be fetched right now. Please try again in a minute."
+            },
             air_result=None,
             profile_result=None,
             form_data=form_data,
