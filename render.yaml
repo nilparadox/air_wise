@@ -1,7 +1,7 @@
 services:
   - type: web
-    name: airwise-ai
+    name: air-wise
     runtime: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python scripts/train_digital_model.py
     startCommand: uvicorn app.api.main:app --host 0.0.0.0 --port $PORT
     autoDeploy: true
